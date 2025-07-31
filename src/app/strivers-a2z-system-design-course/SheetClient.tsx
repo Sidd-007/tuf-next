@@ -26,9 +26,7 @@ type Props = { dehydratedState: unknown };
 export default function SheetClient({ dehydratedState }: Props) {
   return (
     <HydrationBoundary state={dehydratedState}>
-      <Suspense fallback={<p className="p-4">Loading sheet…</p>}>
         <InnerSheet />
-      </Suspense>
     </HydrationBoundary>
   );
 }
