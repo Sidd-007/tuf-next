@@ -1,0 +1,4 @@
+/* make lists + headings match LC */
+.prose ul { list-style: disc; margin-left: 1.25rem; }
+.prose h3 { margin-top: 1.25rem; font-weight: 600; }
+/* .prose strong { color: theme(colors.brand.400); } */

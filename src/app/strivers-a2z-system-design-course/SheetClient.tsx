@@ -1,11 +1,5 @@
 'use client';
 
-import {
-  HydrationBoundary,
-} from '@tanstack/react-query';
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useSheet } from './useSheet';
-import { useSheetUI } from '@/store/sheet-ui';
 import SheetAccordion from '@/components/SheetAccordion';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +11,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useSheetUI } from '@/store/sheet-ui';
 import type { SheetStep, Topic } from '@/types/sheet';
+import {
+  HydrationBoundary,
+} from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { useSheet } from './useSheet';
 
 type Difficulty = 'All' | 'Easy' | 'Medium' | 'Hard';
 
@@ -26,7 +26,7 @@ type Props = { dehydratedState: unknown };
 export default function SheetClient({ dehydratedState }: Props) {
   return (
     <HydrationBoundary state={dehydratedState}>
-        <InnerSheet />
+      <InnerSheet />
     </HydrationBoundary>
   );
 }
@@ -48,7 +48,7 @@ function InnerSheet() {
   } = useSheetUI();
 
   /* 3 ─ derive data (hooks must run unconditionally) */
-  const safeSheet: SheetStep[] = sheet ?? [];                 // empty until fetch resolves
+  const safeSheet = useMemo(() => sheet ?? [], [sheet]);                 // empty until fetch resolves
 
   const sheetFiltered = useMemo<SheetStep[]>(() => {
     const searchStr = search.trim().toLowerCase();
@@ -95,67 +95,71 @@ function InnerSheet() {
 
   /* 5 ─ render */
   if (isLoading) return <p className="p-4">Loading sheet…</p>;
-  if (error)     return <p className="p-4 text-red-500">Failed to load sheet.</p>;
+  if (error) return <p className="p-4 text-red-500">Failed to load sheet.</p>;
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-        <Select
-          value={difficulty}
-          onValueChange={(v) => setDifficulty(v as Difficulty)}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {(['All', 'Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => (
-              <SelectItem key={d} value={d}>
-                {d}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="m-4 flex flex-col  ">
+      <div className="flex flex-col gap-6 p-6 bg-zinc-50 dark:bg-zinc-900 ">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end shrink-0 pb-6 ">
+          <Select
+            value={difficulty}
+            onValueChange={(v) => setDifficulty(v as Difficulty)}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(['All', 'Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Input
-          placeholder="Search problem…"
-          className="sm:w-64"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+          <Input
+            placeholder="Search problem…"
+            className="sm:w-64"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
-        <Button
-          variant="secondary"
-          onClick={toggleRandom}
-          className={cn(
-            buttonVariants({ variant: 'secondary' }),
-            showRandom && 'bg-brand/20 text-brand',
-          )}
-        >
-          {showRandom ? 'Back to list' : 'Pick random'}
-        </Button>
-      </div>
+          <Button
+            variant="secondary"
+            onClick={toggleRandom}
+            className={cn(
+              buttonVariants({ variant: 'secondary' }),
+              showRandom && 'bg-brand/20 text-brand',
+            )}
+          >
+            {showRandom ? 'Back to list' : 'Pick random'}
+          </Button>
+        </div>
 
-      {/* Main content */}
-      {showRandom && randomTopic ? (
-        <div className="border rounded-xl p-6 bg-card">
-          <h2 className="text-lg font-semibold mb-2">
-            {randomTopic.question_title}
-          </h2>
-          {randomTopic.post_link && (
-            <a
-              href={randomTopic.post_link}
-              target="_blank"
-              rel="noreferrer"
-              className="text-brand underline"
-            >
-              Open editorial
-            </a>
+        {/* Main content */}
+        <div className='grow overflow-y-auto pr-2'>
+          {showRandom && randomTopic ? (
+            <div className="border rounded-xl p-6 bg-card">
+              <h2 className="text-lg font-semibold mb-2">
+                {randomTopic.question_title}
+              </h2>
+              {randomTopic.post_link && (
+                <a
+                  href={randomTopic.post_link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-brand underline"
+                >
+                  Open editorial
+                </a>
+              )}
+            </div>
+          ) : (
+            <SheetAccordion sheet={sheetFiltered} />
           )}
         </div>
-      ) : (
-        <SheetAccordion sheet={sheetFiltered} />
-      )}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 // app/strivers-a2z-system-design-course/page.tsx
-import type { Metadata } from 'next';
-import SheetClient from './SheetClient';
+import { fetchSheet } from '@/lib/api'; // same as before
+import { getUserFromCookie } from '@/lib/auth';
 import { QueryClient, dehydrate } from '@tanstack/react-query';
-import { fetchSheet } from '@/lib/api';    // same as before
+import type { Metadata } from 'next';
+import Providers from '../providers';
+import SheetClient from './SheetClient';
 
 export const metadata: Metadata = {
   title: 'Strivers A2Z DSA Course/Sheet - Crack Any FAANG or PBCs',
@@ -13,8 +15,8 @@ export const metadata: Metadata = {
       'https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/',
   },
   openGraph: {
-    type : 'website',
-    url  :
+    type: 'website',
+    url:
       'https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/',
     title:
       'Strivers A2Z DSA Course/Sheet - Crack Any FAANG or PBCs',
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card : 'summary',
+    card: 'summary',
     title:
       'Strivers A2Z DSA Course/Sheet - Crack Any FAANG or PBCs',
     description:
@@ -38,9 +40,22 @@ export const metadata: Metadata = {
 
 export const runtime = 'edge';
 
+
 export default async function Page() {
+  const user = await getUserFromCookie();
+
+  // build your sheet data
   const qc = new QueryClient();
   await qc.prefetchQuery({ queryKey: ['sheet'], queryFn: fetchSheet });
 
-  return <SheetClient dehydratedState={dehydrate(qc)} />;
+  return (
+    // pass user **and** whether we should open at mount
+    <Providers
+      user={user}
+      initialLoginModalOpen={!user}
+      dehydratedState={dehydrate(qc)}
+    >
+      <SheetClient dehydratedState={dehydrate(qc)} />
+    </Providers>
+  );
 }
