@@ -10,6 +10,8 @@ import { selectionSort } from '../static/selection-sort';
 // import insertionSort from '@/lib/problems/insertion-sort';
 // import mergeSort     from '@/lib/problems/merge-sort';
 
+export const runtime = 'edge';
+
 /* ----------------------------------------------------------------
    1)  A single dictionary of every static problem object.
        The keys are their route slugs.
