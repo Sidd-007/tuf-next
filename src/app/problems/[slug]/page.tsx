@@ -23,15 +23,7 @@ const problems: Record<string, Problem> = {
 } as const;
 
 /* ----------------------------------------------------------------
-   2)  Tell Next.js which /​problems/[slug] pages to pre-generate
-       at build time (static generation).
------------------------------------------------------------------ */
-export function generateStaticParams() {
-  return Object.keys(problems).map((slug) => ({ slug }));
-}
-
-/* ----------------------------------------------------------------
-   3)  Page component – lookup the problem, 404 if it doesn't exist.
+   2)  Page component – lookup the problem, 404 if it doesn't exist.
 ----------------------------------------------------------------- */
 type PageProps = { params: Promise<{ slug: string }> };
 
